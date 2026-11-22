@@ -1,7 +1,7 @@
-// Tiny stack VM for make.fun's ISA v1: runs every /input/<id>/program.bin and writes stdout.bin and exit.txt.
+// Tiny stack VM, ISA v1
 import{readdirSync as L,readFileSync as F,writeFileSync as W,mkdirSync as M}from'fs'
 const I=process.env.MAKEFUN_INPUT_DIR??'/input',O=process.env.MAKEFUN_OUTPUT_DIR??'/output'
-// opcode -> [immediate bytes, pops, pushes]
+// op:[imm,pops,pushes]
 const K={0:'000',1:'101',2:'401',3:'010',4:'012',5:'022',6:'023',7:'033',23:'011',27:'011',48:'200',49:'210',50:'210',51:'200',52:'000',64:'011',65:'020',80:'010',81:'010',82:'001',83:'010'}
 const B={16:(a,b)=>a+b,17:(a,b)=>a-b,18:Math.imul,19:(a,b)=>a/b,20:(a,b)=>a%b,21:(a,b)=>(a>>>0)/(b>>>0),22:(a,b)=>(a>>>0)%(b>>>0),24:(a,b)=>a&b,25:(a,b)=>a|b,26:(a,b)=>a^b,28:(a,b)=>a<<b,29:(a,b)=>a>>b,30:(a,b)=>a>>>b,32:(a,b)=>a==b,33:(a,b)=>a<b,34:(a,b)=>a>>>0<b>>>0}
 for(const o in B)K[o]='021'
@@ -44,6 +44,7 @@ case 82:D[s++]=i<u.length?u[i++]:-1;break
 case 83:return E(b&255)
 default:if(o>18&&o<23&&!b)return E(4);D[s-2]=B[o](a,b);s--}}}
 for(const d of L(I).sort()){
-let u;try{u=F(`${I}/${d}/input.bin`)}catch{u=Buffer.alloc(0)}
-const[r,e]=run(F(`${I}/${d}/program.bin`),u)
-M(`${O}/${d}`,{recursive:true});W(`${O}/${d}/stdout.bin`,r);W(`${O}/${d}/exit.txt`,''+e)}
+const f=I+'/'+d+'/',g=O+'/'+d+'/'
+let u;try{u=F(f+'input.bin')}catch{u=[]}
+const[r,e]=run(F(f+'program.bin'),u)
+M(g,{recursive:true});W(g+'stdout.bin',r);W(g+'exit.txt',''+e)}
