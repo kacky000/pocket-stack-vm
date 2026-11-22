@@ -1,11 +1,9 @@
 // Tiny stack VM, ISA v1
 import{readdirSync as L,readFileSync as F,writeFileSync as W,mkdirSync as M}from'fs'
 const I=process.env.MAKEFUN_INPUT_DIR??'/input',O=process.env.MAKEFUN_OUTPUT_DIR??'/output'
-// op:[imm,pops,pushes]
-const K={0:'000',1:'101',2:'401',3:'010',4:'012',5:'022',6:'023',7:'033',23:'011',27:'011',48:'200',49:'210',50:'210',51:'200',52:'000',64:'011',65:'020',80:'010',81:'010',82:'001',83:'010'}
+// op -> 48+pops*4+pushes; ' ' = no such op
+const P='01146:;?        999999959995999 999             04400           58              4414'
 const B={16:(a,b)=>a+b,17:(a,b)=>a-b,18:Math.imul,19:(a,b)=>a/b,20:(a,b)=>a%b,21:(a,b)=>(a>>>0)/(b>>>0),22:(a,b)=>(a>>>0)%(b>>>0),24:(a,b)=>a&b,25:(a,b)=>a|b,26:(a,b)=>a^b,28:(a,b)=>a<<b,29:(a,b)=>a>>b,30:(a,b)=>a>>>b,32:(a,b)=>a==b,33:(a,b)=>a<b,34:(a,b)=>a>>>0<b>>>0}
-for(const o in B)K[o]='021'
-for(const o in K)K[o]=[...K[o]].map(Number)
 function run(p,u){
 const n=p.length,D=new Int32Array(256),C=[],m=new Int32Array(256),t=Buffer.alloc(65536)
 let s=0,c=0,i=0,z=0,l=0,x
@@ -13,13 +11,13 @@ const E=e=>[t.subarray(0,l),e]
 for(;;){
 if(z==1e6)return E(10)
 if(c<0||c>=n)return E(9)
-const o=p[c],k=K[o]
-if(!k)return E(5)
-if(c+k[0]>=n)return E(9)
+const o=p[c],k=P.charCodeAt(o)-48,w=o==1?1:o==2?4:o>47&o<52?2:0
+if(!(k>=0))return E(5)
+if(c+w>=n)return E(9)
 z++
-if(s<k[1])return E(2)
-if(s-k[1]+k[2]>256)return E(3)
-const q=c+1+k[0],b=D[s-1],a=D[s-2]
+if(s<k>>2)return E(2)
+if(s-(k>>2)+(k&3)>256)return E(3)
+const q=c+1+w,b=D[s-1],a=D[s-2]
 c=q
 switch(o){
 case 0:return E(0)
